@@ -1,0 +1,163 @@
+{
+	"bsonType": "object",
+	"required": ["code", "name", "brand", "model", "category_id", "dept_id", "location_id"],
+	"permission": {
+		"read": true,
+		"create": "'CREATE_MEDICAL_DEVICE' in auth.permission || 'app_admin' in auth.role",
+		"update": "'UPDATE_MEDICAL_DEVICE' in auth.permission || 'app_admin' in auth.role",
+		"delete": "'DELETE_MEDICAL_DEVICE' in auth.permission || 'app_admin' in auth.role"
+	},
+	"properties": {
+		"_id": {
+			"description": "存储文档 ID，系统自动生成"
+		},
+		"code": {
+			"bsonType": "string",
+			"description": "设备编号",
+			"trim": "both",
+			"uniqueItems": true
+		},
+		"name": {
+			"bsonType": "string",
+			"description": "设备名称",
+			"trim": "both"
+		},
+		"short_name": {
+			"bsonType": "string",
+			"description": "设备简称",
+			"trim": "both"
+		},
+		"manufacturer": {
+			"bsonType": "string",
+			"description": "厂家",
+			"trim": "both"
+		},
+		"brand": {
+			"bsonType": "string",
+			"description": "品牌",
+			"trim": "both"
+		},
+		"model": {
+			"bsonType": "string",
+			"description": "规格型号",
+			"trim": "both"
+		},
+		"spec": {
+			"bsonType": "string",
+			"description": "注册证号\/备案号",
+			"trim": "both"
+		},
+		"serial_no": {
+			"bsonType": "string",
+			"description": "产品编号",
+			"trim": "both"
+		},
+		"category_id": {
+			"bsonType": "string",
+			"description": "设备分类ID",
+			"foreignKey": "medical-device-category._id"
+		},
+		"dept_id": {
+			"bsonType": "string",
+			"description": "使用部门ID",
+			"foreignKey": "opendb-department._id"
+		},
+		"location_id": {
+			"bsonType": "string",
+			"description": "存放位置ID",
+			"foreignKey": "medical-device-location._id"
+		},
+		"purchase_date": {
+			"bsonType": "timestamp",
+			"description": "采购日期"
+		},
+		"purchase_amount": {
+			"bsonType": "double",
+			"description": "采购金额"
+		},
+		"supplier": {
+			"bsonType": "string",
+			"description": "供应商",
+			"trim": "both"
+		},
+		"warranty_end": {
+			"bsonType": "timestamp",
+			"description": "保修期截止"
+		},
+		"status": {
+			"bsonType": "int",
+			"description": "使用状态:1-正常,2-使用中,3-维修中,4-报废,5-未投入,6-其他",
+			"defaultValue": 1,
+			"enum": [1, 2, 3, 4, 5, 6]
+		},
+		"image_url": {
+			"bsonType": "string",
+			"description": "设备照片URL",
+			"trim": "both"
+		},
+		"qr_code": {
+			"bsonType": "string",
+			"description": "二维码",
+			"trim": "both",
+			"uniqueItems": true
+		},
+		"person_in_charge": {
+			"bsonType": "string",
+			"description": "设备负责人",
+			"trim": "both"
+		},
+		"management_type": {
+			"bsonType": "int",
+			"description": "设备管理类型:1-一类,2-二类,3-三类,4-非医疗器械",
+			"defaultValue": 4,
+			"enum": [1, 2, 3, 4]
+		},
+		"applicable_scope": {
+			"bsonType": "string",
+			"description": "设备适用范围",
+			"trim": "both"
+		},
+		"manufacture_date": {
+			"bsonType": "timestamp",
+			"description": "生产日期"
+		},
+		"service_life": {
+			"bsonType": "int",
+			"description": "使用年限"
+		},
+		"remark": {
+			"bsonType": "string",
+			"description": "备注"
+		},
+		"creator": {
+			"bsonType": "string",
+			"description": "创建人ID",
+			"foreignKey": "uni-id-users._id"
+		},
+		"created_at": {
+			"bsonType": "timestamp",
+			"description": "创建时间",
+			"forceDefaultValue": {
+				"$env": "now"
+			}
+		},
+		"updater": {
+			"bsonType": "string",
+			"description": "更新人ID",
+			"foreignKey": "uni-id-users._id"
+		},
+		"updated_at": {
+			"bsonType": "timestamp",
+			"description": "更新时间",
+			"forceDefaultValue": {
+				"$env": "now"
+			}
+		},
+		"deleted": {
+			"bsonType": "int",
+			"description": "是否删除:0-否,1-是",
+			"defaultValue": 0,
+			"enum": [0, 1]
+		}
+	}
+}

@@ -1,0 +1,72 @@
+[
+	{
+		"code": "01",
+		"name": "监护设备",
+		"parent_id": "",
+		"sort": 10,
+		"remark": "生命体征监护类设备"
+	},
+	{
+		"code": "02",
+		"name": "影像设备",
+		"parent_id": "",
+		"sort": 20,
+		"remark": "医学影像诊断设备"
+	},
+	{
+		"code": "03",
+		"name": "检验设备",
+		"parent_id": "",
+		"sort": 30,
+		"remark": "实验室检验设备"
+	},
+	{
+		"code": "04",
+		"name": "治疗设备",
+		"parent_id": "",
+		"sort": 40,
+		"remark": "治疗类医疗设备"
+	},
+	{
+		"code": "05",
+		"name": "诊断设备",
+		"parent_id": "",
+		"sort": 50,
+		"remark": "诊断类医疗设备"
+	},
+	{
+		"code": "0101",
+		"name": "多参数监护仪",
+		"parent_id": "medical_device_category_1",
+		"sort": 11,
+		"remark": ""
+	},
+	{
+		"code": "0201",
+		"name": "超声诊断仪",
+		"parent_id": "medical_device_category_2",
+		"sort": 21,
+		"remark": ""
+	},
+	{
+		"code": "0301",
+		"name": "生化分析仪",
+		"parent_id": "medical_device_category_3",
+		"sort": 31,
+		"remark": ""
+	},
+	{
+		"code": "0202",
+		"name": "X射线设备",
+		"parent_id": "medical_device_category_2",
+		"sort": 22,
+		"remark": ""
+	},
+	{
+		"code": "0501",
+		"name": "心电图机",
+		"parent_id": "medical_device_category_5",
+		"sort": 51,
+		"remark": ""
+	}
+]

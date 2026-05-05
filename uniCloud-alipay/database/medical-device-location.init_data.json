@@ -1,0 +1,47 @@
+[
+	{
+		"code": "ICU-01",
+		"name": "ICU监护室1号位",
+		"dept_id": "dept_1",
+		"building": "住院部",
+		"floor": "3楼",
+		"room": "301",
+		"remark": "重症监护室"
+	},
+	{
+		"code": "ER-01",
+		"name": "急诊科超声室",
+		"dept_id": "dept_2",
+		"building": "急诊楼",
+		"floor": "1楼",
+		"room": "105",
+		"remark": "急诊超声检查室"
+	},
+	{
+		"code": "LAB-01",
+		"name": "检验科生化室",
+		"dept_id": "dept_3",
+		"building": "医技楼",
+		"floor": "2楼",
+		"room": "208",
+		"remark": "生化检验室"
+	},
+	{
+		"code": "RAD-01",
+		"name": "放射科DR室",
+		"dept_id": "dept_4",
+		"building": "医技楼",
+		"floor": "1楼",
+		"room": "101",
+		"remark": "数字化X射线摄影室"
+	},
+	{
+		"code": "CARD-01",
+		"name": "心内科心电图室",
+		"dept_id": "dept_5",
+		"building": "门诊楼",
+		"floor": "2楼",
+		"room": "210",
+		"remark": "心电图检查室"
+	}
+]

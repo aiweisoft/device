@@ -1,0 +1,24 @@
+{
+    "name": "maintenance-alert-cron",
+    "version": "1.0.0",
+    "description": "保养计划定时扫描，自动生成报警提醒",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "",
+    "license": "ISC",
+    "cloudfunction-config": {
+        "concurrency": 1,
+        "memorySize": 256,
+        "timeout": 120,
+        "triggers": [
+            {
+                "name": "maintenance-alert-cron",
+                "type": "timer",
+                "config": "0 0 8 * * * *"
+            }
+        ]
+    },
+    "extensions": {}
+}

@@ -1,0 +1,64 @@
+{
+	"indexes": [
+		{
+			"IndexName": "code_1",
+			"MgoKeySchema": {
+				"MgoIndexKeys": [{
+					"Name": "code",
+					"Direction": "ascending"
+				}],
+				"MgoIsUnique": true
+			}
+		},
+		{
+			"IndexName": "qr_code_1",
+			"MgoKeySchema": {
+				"MgoIndexKeys": [{
+					"Name": "qr_code",
+					"Direction": "ascending"
+				}],
+				"MgoIsUnique": true
+			}
+		},
+		{
+			"IndexName": "category_id_1",
+			"MgoKeySchema": {
+				"MgoIndexKeys": [{
+					"Name": "category_id",
+					"Direction": "ascending"
+				}],
+				"MgoIsUnique": false
+			}
+		},
+		{
+			"IndexName": "dept_id_1",
+			"MgoKeySchema": {
+				"MgoIndexKeys": [{
+					"Name": "dept_id",
+					"Direction": "ascending"
+				}],
+				"MgoIsUnique": false
+			}
+		},
+		{
+			"IndexName": "status_1",
+			"MgoKeySchema": {
+				"MgoIndexKeys": [{
+					"Name": "status",
+					"Direction": "ascending"
+				}],
+				"MgoIsUnique": false
+			}
+		},
+		{
+			"IndexName": "created_at_-1",
+			"MgoKeySchema": {
+				"MgoIndexKeys": [{
+					"Name": "created_at",
+					"Direction": "descending"
+				}],
+				"MgoIsUnique": false
+			}
+		}
+	]
+}

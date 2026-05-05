@@ -1,0 +1,12 @@
+{
+  "permission": {
+    "edit": {
+      "*": "allow"
+    },
+    "external_directory": {
+      "D:/Users/Administrator/Documents/HBuilderProjects/neihao-web/*": "allow",
+      "D:/Users/Administrator/Documents/*": "allow",
+      "D:\\temp\\svgconv\\*": "allow"
+    }
+  }
+}
