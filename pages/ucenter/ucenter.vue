@@ -93,7 +93,8 @@
 						"icon": "notification"
 					}, {
 						"title": "设备列表",
-						"to": '/pages/device/device-list',
+						"to": '',
+						"event": "toDeviceList",
 						"icon": "list"
 					}],
 					[{
@@ -184,6 +185,9 @@
 						icon: 'none'
 					});
 				}
+			},
+			toDeviceList() {
+				uni.switchTab({ url: '/pages/device/device-list' })
 			},
 			toUserInfo() {
 				uni.navigateTo({

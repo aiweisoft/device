@@ -4,7 +4,7 @@
 			<view class="tab" :class="tabActive === 0 ? 'tab-active' : ''" @click="switchTab(0)">我的报修</view>
 			<view class="tab" :class="tabActive === 1 ? 'tab-active' : ''" @click="switchTab(1)">维修记录</view>
 		</view>
-		<unicloud-db ref="udb" :collection="collectionList" :where="where" page-data="replace" :getcount="true"
+		<unicloud-db ref="udb" :collection="collectionName" :where="where" page-data="replace" :getcount="true"
 			:page-size="15" v-slot:default="{data, pagination, hasMore, loading, error}" @load="onLoad">
 			<uni-list class="list" :border="false">
 				<uni-list-item v-for="(item, i) in data" :key="i">
@@ -34,6 +34,9 @@
 <script>
 const db = uniCloud.database()
 const dbCmd = db.command
+import {
+	store
+} from '@/uni_modules/uni-id-pages/common/store.js'
 const statusMap = {
 	1: { text: '待处理', type: 'warning' },
 	2: { text: '处理中', type: 'primary' },
@@ -42,36 +45,34 @@ const statusMap = {
 }
 export default {
 	data() {
+		const uid = store.userInfo?._id || ''
 		return {
 			tabActive: 0,
-			where: 'deleted == 0',
+			where: uid ? 'deleted == 0 && creator == "' + uid + '"' : 'deleted == 0',
 			deviceId: ''
 		}
 	},
 	computed: {
-		collectionList() {
-			if (this.tabActive === 0) {
-				return db.collection('medical-device-repair-request').where(this.where).getTemp()
-			}
-			return db.collection('medical-device-repair').where(this.where).getTemp()
+		collectionName() {
+			return this.tabActive === 0 ? 'medical-device-repair-request' : 'medical-device-repair'
+		},
+		uid() {
+			return store.userInfo?._id || ''
 		}
 	},
 	onLoad(e) {
+		this.where = 'deleted == 0 && creator == "' + this.uid + '"'
 		if (e.device_id) {
 			this.deviceId = e.device_id
-			this.switchTab(0)
+			this.where += ' && device_id == "' + e.device_id + '"'
 		}
-	},
-	onReady() {
-		this.$refs.udb?.loadData()
 	},
 	methods: {
 		switchTab(i) {
 			this.tabActive = i
-			let where = 'deleted == 0'
+			let where = 'deleted == 0 && creator == "' + this.uid + '"'
 			if (this.deviceId) where += ' && device_id == "' + this.deviceId + '"'
 			this.where = where
-			this.$nextTick(() => this.$refs.udb?.loadData({ clear: true }))
 		},
 		loadMore() { this.$refs.udb?.loadMore() },
 		toAdd() { uni.navigateTo({ url: '/pages/repair-request/add' + (this.deviceId ? '?device_id=' + this.deviceId : '') }) },

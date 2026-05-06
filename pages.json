@@ -2,7 +2,8 @@
 	"pages": [{
 			"path": "pages/index/index",
 			"style": {
-				"navigationStyle": "custom"
+				"navigationStyle": "custom",
+				"enablePullDownRefresh": true
 			}
 		},
 		{
@@ -48,7 +49,8 @@
 		{
 			"path": "pages/alert/list",
 			"style": {
-				"navigationBarTitleText": "提醒消息"
+				"navigationBarTitleText": "提醒消息",
+				"enablePullDownRefresh": true
 			}
 		},
 		{
@@ -275,7 +277,10 @@
 	"uniIdRouter": {
 		"loginPage": "uni_modules/uni-id-pages/pages/login/login-withoutpwd",
 		"needLogin": [
-			"/uni_modules/uni-id-pages/pages/userinfo/userinfo"
+			"/uni_modules/uni-id-pages/pages/userinfo/userinfo",
+			"/pages/repair-request/add",
+			"/pages/repair-request/list",
+			"/pages/alert/list"
 		],
 		"resToLogin": true
 	}

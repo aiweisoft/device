@@ -1,5 +1,8 @@
 <template>
 	<view class="warp">
+		<!-- 下拉刷新指示器（APP/小程序） -->
+		<uni-load-more v-if="refreshing" status="loading" :content-text="loadText"></uni-load-more>
+
 		<view class="header">
 			<view class="header-top">
 				<view>
@@ -15,18 +18,20 @@
 			</view>
 		</view>
 
+		<!-- 统计卡片 -->
 		<view class="stats-grid">
 			<view class="stat-card" v-for="(item, i) in stats" :key="i" @click="navigateToStat(item)">
 				<view class="stat-icon-box" :style="{backgroundColor: item.bgColor}">
 					<text class="stat-icon" :style="{color: item.color}">{{ icons[item.label] }}</text>
 				</view>
 				<view class="stat-body">
-					<text class="stat-number" :style="{color: item.color}">{{ item.count }}</text>
+					<text class="stat-number" :style="{color: item.color}">{{ loading ? '--' : item.count }}</text>
 					<text class="stat-label">{{ item.label }}</text>
 				</view>
 			</view>
 		</view>
 
+		<!-- 快捷操作 -->
 		<view class="quick-actions">
 			<view class="section-title">
 				<text class="section-title-text">快捷操作</text>
@@ -43,7 +48,18 @@
 			</uni-grid>
 		</view>
 
-		<view class="alert-section" v-if="recentAlerts.length">
+		<!-- 加载骨架 -->
+		<view class="alert-section empty-section" v-if="loading">
+			<view class="section-title">
+				<text class="section-title-text">待处理提醒</text>
+			</view>
+			<view class="empty-state">
+				<text class="empty-text">加载中...</text>
+			</view>
+		</view>
+
+		<!-- 待处理提醒 -->
+		<view class="alert-section" v-else-if="!error && recentAlerts.length">
 			<view class="section-title">
 				<text class="section-title-text">待处理提醒 <text class="alert-badge">{{ recentAlerts.length }}</text></text>
 				<text class="section-more" @click="toAlerts">查看全部</text>
@@ -60,13 +76,25 @@
 			</view>
 		</view>
 
-		<view class="alert-section empty-section" v-else>
+		<!-- 提醒空状态 -->
+		<view class="alert-section empty-section" v-else-if="!error">
 			<view class="section-title">
 				<text class="section-title-text">待处理提醒</text>
 			</view>
 			<view class="empty-state">
 				<text class="empty-icon-font">&#xe62c;</text>
 				<text class="empty-text">暂无待处理提醒</text>
+			</view>
+		</view>
+
+		<!-- 错误状态 -->
+		<view class="alert-section empty-section" v-else>
+			<view class="section-title">
+				<text class="section-title-text">数据加载失败</text>
+			</view>
+			<view class="empty-state" @click="refreshAll">
+				<text class="empty-icon-font">&#xe657;</text>
+				<text class="empty-text retry-text">点击重试</text>
 			</view>
 		</view>
 	</view>
@@ -80,11 +108,20 @@ import {
 export default {
 	data() {
 		return {
+			loading: false,
+			refreshing: false,
+			error: false,
+			loadText: {
+				contentdown: '',
+				contentrefresh: '加载中...',
+				contentnomore: ''
+			},
 			stats: [
 				{ label: '设备总数', count: 0, color: '#4f46e5', bgColor: '#eef2ff', icon: 'list', status: '' },
 				{ label: '使用中', count: 0, color: '#059669', bgColor: '#ecfdf5', icon: 'checkmarkempty', status: 2 },
 				{ label: '维修中', count: 0, color: '#d97706', bgColor: '#fffbeb', icon: 'undo', status: 3 },
-				{ label: '待处理报修', count: 0, color: '#dc2626', bgColor: '#fef2f2', icon: 'paperplane', status: 'pending-repair' }
+				{ label: '待处理报修', count: 0, color: '#dc2626', bgColor: '#fef2f2', icon: 'paperplane', status: 'pending-repair' },
+				{ label: '待保养', count: 0, color: '#0891b2', bgColor: '#ecfeff', icon: 'calendar', status: 'pending-maintenance' }
 			],
 			actions: [
 				{ label: '扫一扫', uni: '\ue62a', bgColor: '#6366f1', action: 'toScan' },
@@ -101,7 +138,8 @@ export default {
 				'设备总数': '\ue644',
 				'使用中': '\ue65c',
 				'维修中': '\ue64f',
-				'待处理报修': '\ue672'
+				'待处理报修': '\ue672',
+				'待保养': '\ue6a6'
 			}
 		}
 	},
@@ -126,55 +164,106 @@ export default {
 		}
 	},
 	onShow() {
-		this.loadStats()
-		this.loadRecentAlerts()
+		this.refreshAll()
+	},
+	onPullDownRefresh() {
+		this.refreshing = true
+		this.refreshAll().then(() => {
+			this.refreshing = false
+			uni.stopPullDownRefresh()
+		}).catch(() => {
+			this.refreshing = false
+			uni.stopPullDownRefresh()
+		})
 	},
 	methods: {
+		async refreshAll() {
+			this.error = false
+			this.loading = true
+			try {
+				await Promise.all([this.loadStats(), this.loadRecentAlerts()])
+			} catch (e) {
+				console.error('refreshAll error:', e)
+				this.error = true
+			} finally {
+				this.loading = false
+			}
+		},
 		async loadStats() {
 			try {
-				const [totalRes, normalRes, repairRes, pendingRepairRes] = await Promise.all([
+				const now = Date.now()
+				const [
+					totalRes,
+					normalRes,
+					repairRes,
+					pendingRepairRes,
+					pendingMaintRes
+				] = await Promise.all([
 					db.collection('medical-device').where('deleted == 0').count(),
 					db.collection('medical-device').where('deleted == 0 && status == 2').count(),
 					db.collection('medical-device').where('deleted == 0 && status == 3').count(),
-					db.collection('medical-device-repair-request').where('status == 0').count()
+					db.collection('medical-device-repair-request').where('deleted == 0 && status == 1').count(),
+					db.collection('medical-device-maintenance').where('status != 2 && plan_date < ' + now).count()
 				])
 				const getCount = (res) => res?.total ?? res?.result?.total ?? 0
 				this.stats = [
 					{ label: '设备总数', count: getCount(totalRes), color: '#4f46e5', bgColor: '#eef2ff', icon: 'list', status: '' },
 					{ label: '使用中', count: getCount(normalRes), color: '#059669', bgColor: '#ecfdf5', icon: 'checkmarkempty', status: 2 },
 					{ label: '维修中', count: getCount(repairRes), color: '#d97706', bgColor: '#fffbeb', icon: 'undo', status: 3 },
-					{ label: '待处理报修', count: getCount(pendingRepairRes), color: '#dc2626', bgColor: '#fef2f2', icon: 'paperplane', status: 'pending-repair' }
+					{ label: '待处理报修', count: getCount(pendingRepairRes), color: '#dc2626', bgColor: '#fef2f2', icon: 'paperplane', status: 'pending-repair' },
+					{ label: '待保养', count: getCount(pendingMaintRes), color: '#0891b2', bgColor: '#ecfeff', icon: 'calendar', status: 'pending-maintenance' }
 				]
 			} catch (e) {
 				console.error('loadStats error:', e)
+				throw e
 			}
 		},
 		async loadRecentAlerts() {
 			try {
-				const res = await db.collection('medical-device-alert').where('is_read == 0').orderBy('alert_date', 'desc').limit(5).get()
+				const res = await db.collection('medical-device-alert')
+					.where('is_read == 0')
+					.orderBy('alert_date', 'desc')
+					.limit(5)
+					.get()
 				this.recentAlerts = res.data || res.result?.data || []
 			} catch (e) {
 				console.error('loadRecentAlerts error:', e)
+				throw e
+			}
+		},
+		async markAlertRead(item) {
+			if (item.is_read) return
+			try {
+				await db.collection('medical-device-alert').doc(item._id).update({
+					is_read: 1,
+					read_date: Date.now()
+				})
+				item.is_read = 1
+			} catch (e) {
+				console.error('markAlertRead error:', e)
 			}
 		},
 		navigateToStat(item) {
-			if (item.status === 'pending-repair') {
-				uni.navigateTo({ url: '/pages/repair-request/list' })
-			} else if (item.status) {
-				uni.navigateTo({ url: '/pages/device/device-list?status=' + item.status })
+			const routes = {
+				'pending-repair': '/pages/repair-request/list',
+				'pending-maintenance': '/pages/alert/list'
+			}
+			const route = routes[item.status]
+			if (route) {
+				uni.navigateTo({ url: route })
 			} else {
-				uni.navigateTo({ url: '/pages/device/device-list' })
+				uni.switchTab({ url: '/pages/device/device-list' })
 			}
 		},
 		execAction(name) {
 			const map = {
 				toScan: () => uni.navigateTo({ url: '/pages/device/scan' }),
-				toDeviceList: () => uni.navigateTo({ url: '/pages/device/device-list' }),
+				toDeviceList: () => uni.switchTab({ url: '/pages/device/device-list' }),
 				toAddRepair: () => uni.navigateTo({ url: '/pages/repair-request/add' }),
 				toRepairs: () => uni.navigateTo({ url: '/pages/repair-request/list' }),
 				toAlerts: () => uni.navigateTo({ url: '/pages/alert/list' }),
-				toRepairHistory: () => uni.navigateTo({ url: '/pages/device/device-list?tab=repair' }),
-				toScanHistory: () => uni.showToast({ title: '暂无扫码记录', icon: 'none' }),
+				toRepairHistory: () => uni.navigateTo({ url: '/pages/repair-request/list' }),
+				toScanHistory: () => uni.navigateTo({ url: '/pages/device/scan' }),
 				toProfile: () => uni.switchTab({ url: '/pages/ucenter/ucenter' })
 			}
 			;(map[name] || (() => {}))()
@@ -186,8 +275,11 @@ export default {
 				uni.navigateTo({ url: '/uni_modules/uni-id-pages/pages/login/login-withpwd' })
 			}
 		},
-		toAlerts() { uni.navigateTo({ url: '/pages/alert/list' }) },
+		toAlerts() {
+			uni.navigateTo({ url: '/pages/alert/list' })
+		},
 		toAlertDetail(item) {
+			this.markAlertRead(item)
 			uni.navigateTo({ url: '/pages/alert/list?highlight=' + item._id })
 		}
 	}
@@ -357,7 +449,7 @@ export default {
 }
 .alert-section {
 	background: #fff;
-	margin: 0 20rpx;
+	margin: 20rpx;
 	border-radius: 16rpx;
 	box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04);
 	.alert-list {
@@ -375,6 +467,7 @@ export default {
 			border-radius: 50%;
 			margin-right: 16rpx;
 			flex-shrink: 0;
+			margin-top: 8rpx;
 		}
 		.dot-unread { background-color: #ef4444; }
 		.dot-read { background-color: #d1d5db; }
@@ -415,5 +508,9 @@ export default {
 		font-size: 40rpx;
 		color: #d1d5db;
 	}
+}
+.retry-text {
+	color: #6366f1;
+	font-weight: 500;
 }
 </style>
