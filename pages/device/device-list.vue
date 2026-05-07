@@ -21,6 +21,11 @@
 							<text class="device-code">编号 {{ item.code }}</text>
 							<text class="device-brand">{{ item.brand }} {{ item.model }}</text>
 						</view>
+						<view class="device-meta">
+							<text class="meta-item" v-if="item.manufacture_date">生产日期 {{ formatDate(item.manufacture_date) }}</text>
+							<text class="meta-item" v-if="item.service_life">使用年限 {{ item.service_life }}年</text>
+							<text class="meta-item" v-if="item.person_in_charge">负责人 {{ item.person_in_charge }}</text>
+						</view>
 						<view class="device-tags">
 							<text class="device-tag tag-location" v-if="item.location_id_text">{{ item.location_id_text }}</text>
 							<text class="device-tag tag-dept" v-if="item.dept_id_text">{{ item.dept_id_text }}</text>
@@ -44,6 +49,7 @@ const statusMap = {
 	5: { text: '未投入', type: 'default' },
 	6: { text: '其他', type: 'info' }
 }
+const managementTypeMap = { 1: '一类', 2: '二类', 3: '三类', 4: '非医疗器械' }
 export default {
 	data() {
 		return {
@@ -78,6 +84,12 @@ export default {
 		},
 		getStatusText(s) { return statusMap[s]?.text || '未知' },
 		getStatusType(s) { return statusMap[s]?.type || 'default' },
+		formatDate(ts) {
+			if (!ts) return '-'
+			const d = new Date(ts)
+			return d.getFullYear() + '年' + String(d.getMonth() + 1).padStart(2, '0') + '月' + String(d.getDate()).padStart(2, '0') + '日'
+		},
+		getManagementTypeText(t) { return managementTypeMap[t] || '' },
 		getStatusColor(s) {
 			const map = { 1: '#10b981', 2: '#3b82f6', 3: '#f59e0b', 4: '#ef4444', 5: '#9ca3af', 6: '#8b5cf6' }
 			return map[s] || '#9ca3af'
@@ -108,6 +120,7 @@ export default {
 		onLoad(data) {
 			this.loadingMore = false
 			if (data && data.length) {
+				data.forEach(i => { i.management_type_text = this.getManagementTypeText(i.management_type) })
 				const ids = [...new Set(data.map(i => i.location_id).filter(Boolean))]
 				const deptIds = [...new Set(data.map(i => i.dept_id).filter(Boolean))]
 				Promise.all([
@@ -142,6 +155,10 @@ export default {
 .device-name { font-size: 30rpx; font-weight: 600; color: #1e293b; flex: 1; margin-right: 12rpx; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .device-info { display: flex; gap: 24rpx; margin-bottom: 10rpx; }
 .device-code, .device-brand { font-size: 24rpx; color: #94a3b8; }
+.device-meta { display: flex; gap: 16rpx; margin-bottom: 8rpx; flex-wrap: wrap; }
+.meta-item { font-size: 22rpx; color: #64748b; }
+.device-meta { display: flex; gap: 16rpx; margin-bottom: 8rpx; flex-wrap: wrap; }
+.meta-item { font-size: 22rpx; color: #64748b; }
 .device-tags { display: flex; gap: 12rpx; flex-wrap: wrap; }
 .device-tag { font-size: 22rpx; padding: 4rpx 14rpx; border-radius: 8rpx; }
 .tag-location { color: #6366f1; background: #eef2ff; }

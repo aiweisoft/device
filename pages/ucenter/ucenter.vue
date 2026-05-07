@@ -6,7 +6,7 @@
 				<cloud-image width="120rpx" height="120rpx" border-radius="50%" v-if="hasLogin&&userInfo.avatar_file&&userInfo.avatar_file.url" :src="userInfo.avatar_file.url"></cloud-image>
 				
 				<view v-else class="defaultAvatarUrl">
-					<text class="avatar-icon-font">&#xe69d;</text>
+					<uni-icons type="person-filled" size="44" color="#6366f1"></uni-icons>
 				</view>
 				
 				<view class="logo-title">
@@ -17,7 +17,7 @@
 		</view>
 		<uni-grid class="grid" :column="4" :showBorder="false" :square="true">
 			<uni-grid-item class="item" v-for="(item,index) in gridList" @click.native="tapGrid(index)" :key="index">
-				<text class="grid-icon-font">{{ iconMap[item.icon] || '' }}</text>
+				<uni-icons :type="item.icon" size="26" color="#6366f1"></uni-icons>
 				<text class="text">{{item.text}}</text>
 			</uni-grid-item>
 		</uni-grid>
@@ -61,26 +61,6 @@
 		// #endif
 		data() {
 			return {
-			iconMap: {
-				'person-filled': '\ue69d',
-				'person': '\ue699',
-				'scan': '\ue62a',
-				'list': '\ue644',
-				'paperplane': '\ue672',
-				'paperplane-filled': '\ue675',
-				'chatboxes': '\ue696',
-				'notification': '\ue6a6',
-				'search': '\ue654',
-				'eye': '\ue651',
-				'checkbox-filled': '\ue62c',
-				'plusempty': '\ue67b',
-				'help': '\ue679',
-				'gear': '\ue664',
-				'info': '\ue669',
-				'loop': '\ue633',
-				'undo': '\ue64f',
-				'checkmarkempty': '\ue65c'
-			},
 			gridList: [],
 				ucenterList: [
 					[{
@@ -374,11 +354,6 @@
 		justify-content: center;
 		align-items: center;
 		border: 4rpx solid #e0e7ff;
-	}
-	.avatar-icon-font {
-		font-family: uniicons;
-		font-size: 44rpx;
-		color: #6366f1;
 	}
 	.logo-title {
 		margin-top: 20rpx;

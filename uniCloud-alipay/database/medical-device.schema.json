@@ -3,9 +3,9 @@
 	"required": ["code", "name", "brand", "model", "category_id", "dept_id", "location_id"],
 	"permission": {
 		"read": true,
-		"create": "'CREATE_MEDICAL_DEVICE' in auth.permission || 'app_admin' in auth.role",
-		"update": "'UPDATE_MEDICAL_DEVICE' in auth.permission || 'app_admin' in auth.role",
-		"delete": "'DELETE_MEDICAL_DEVICE' in auth.permission || 'app_admin' in auth.role"
+		"create": "'CREATE_MEDICAL_DEVICE' in auth.permission",
+		"update": "'UPDATE_MEDICAL_DEVICE' in auth.permission",
+		"delete": "'DELETE_MEDICAL_DEVICE' in auth.permission"
 	},
 	"properties": {
 		"_id": {
@@ -124,6 +124,14 @@
 		"service_life": {
 			"bsonType": "int",
 			"description": "使用年限"
+		},
+		"acceptance_date": {
+			"bsonType": "timestamp",
+			"description": "验收日期"
+		},
+		"warranty_years": {
+			"bsonType": "int",
+			"description": "保修年限（年）"
 		},
 		"remark": {
 			"bsonType": "string",

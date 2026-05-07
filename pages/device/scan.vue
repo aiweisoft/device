@@ -84,5 +84,5 @@ export default {
 .btn-input { margin-top: 40rpx; background: #6366f1; color: #fff; border: none; border-radius: 12rpx; padding: 20rpx 60rpx; font-size: 28rpx; }
 .no-support { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; gap: 30rpx; }
 .no-support-text { font-size: 28rpx; color: #999; }
-.scan-icon-font { font-family: uniicons; font-size: 80rpx; color: #6366f1; }
+
 </style>

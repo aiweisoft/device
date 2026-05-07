@@ -26,7 +26,7 @@
 			<uni-load-state :state="{data, pagination, hasMore, loading, error}" @loadMore="loadMore" />
 		</unicloud-db>
 		<view class="fab" @click="toAdd">
-			<text class="fab-icon-font">&#xe67b;</text>
+			<uni-icons type="plusempty" size="28" color="#fff"></uni-icons>
 		</view>
 	</view>
 </template>
@@ -112,5 +112,5 @@ export default {
 .item-meta { display: flex; gap: 20rpx; }
 .item-date, .item-urgency { font-size: 22rpx; color: #94a3b8; }
 .fab { position: fixed; right: 40rpx; bottom: 40rpx; width: 100rpx; height: 100rpx; background: #6366f1; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4rpx 16rpx rgba(99,102,241,0.4); }
-.fab-icon-font { font-family: uniicons; font-size: 28rpx; color: #fff; }
+
 </style>
