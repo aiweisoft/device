@@ -63,7 +63,7 @@ export default {
 	onLoad(e) {
 		this.loadDevices()
 		if (e.device_id) {
-			this.loadDeviceById(e.device_id)
+			this.loadDeviceById(e.device_id, e.device_name)
 		}
 	},
 	methods: {
@@ -71,8 +71,8 @@ export default {
 			try {
 				const res = await db.collection('medical-device').where({
 					deleted: 0,
-					status: dbCmd.neq(3)
-				}).field('_id,name,code').get()
+					status: 2
+				}).field('_id,name,code').limit(10000).get()
 				const map = {}
 				const candidates = (res.result.data || []).map(d => {
 					const text = d.name + ' (' + d.code + ')'
@@ -83,8 +83,16 @@ export default {
 				this.deviceCandidates = candidates
 			} catch (e) { console.error(e) }
 		},
-		async loadDeviceById(id) {
+		async loadDeviceById(id, name) {
 			try {
+				if (name) {
+					const res = await db.collection('medical-device').doc(id).field('code').get()
+					const code = res.result.data?.[0]?.code || ''
+					const text = name + ' (' + code + ')'
+					this.deviceText = text
+					this.formData.device_id = id
+					return
+				}
 				const res = await db.collection('medical-device').doc(id).field('_id,name,code').get()
 				const device = res.result.data && res.result.data[0]
 				if (device) {

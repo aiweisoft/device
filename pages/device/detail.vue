@@ -52,7 +52,6 @@
 				<view class="info-row"><text class="label">采购日期</text><text class="value">{{ formatDate(device.purchase_date) }}</text></view>
 				<view class="info-row"><text class="label">采购金额</text><text class="value">{{ formatAmount(device.purchase_amount) }}</text></view>
 				<view class="info-row"><text class="label">供应商</text><text class="value">{{ device.supplier || '-' }}</text></view>
-				<view class="info-row"><text class="label">验收日期</text><text class="value">{{ formatDate(device.acceptance_date) }}</text></view>
 			</view>
 
 			<!-- 质保信息 -->
@@ -60,6 +59,7 @@
 			<view class="info-section">
 				<view class="info-row"><text class="label">生产日期</text><text class="value">{{ formatDate(device.manufacture_date) }}</text></view>
 				<view class="info-row"><text class="label">使用年限</text><text class="value">{{ device.service_life ? device.service_life + '年' : '-' }}</text></view>
+				<view class="info-row"><text class="label">验收日期</text><text class="value">{{ formatDate(device.acceptance_date) }}</text></view>
 				<view class="info-row"><text class="label">保修年限</text><text class="value">{{ device.warranty_years ? device.warranty_years + '年' : '-' }}</text></view>
 				<view class="info-row"><text class="label">保修截止</text><text class="value">{{ formatDate(device.warranty_end) }}</text></view>
 			</view>
@@ -138,7 +138,16 @@ export default {
 		},
 		formatAmount(v) { return v != null ? '¥' + v.toLocaleString('zh-CN') : '-' },
 		previewImage() {
-			uni.previewImage({ urls: [this.device.image_url] })
+			let urls = []
+			const img = this.device.image_url
+			if (Array.isArray(img)) {
+				urls = img.map(i => typeof i === 'object' ? (i.url || i.path) : i)
+			} else if (typeof img === 'string') {
+				urls = [img]
+			}
+			if (urls.length) {
+				uni.previewImage({ urls })
+			}
 		},
 		toRepair() {
 			uni.navigateTo({ url: '/pages/repair-request/add?device_id=' + this.device._id + '&device_name=' + this.device.name })

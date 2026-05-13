@@ -12,12 +12,17 @@
 						<view class="item">
 							<view class="item-top">
 								<text class="item-device">{{ item.device_name || '未知设备' }}</text>
-								<uni-tag v-if="item.status_text" :text="item.status_text" :type="item.status_type" size="small" />
+								<view class="item-top-right">
+									<uni-tag v-if="tabActive === 0 && item.status_text" :text="item.status_text" :type="item.status_type" size="small" />
+									<uni-tag v-if="tabActive === 1 && item.result_text" :text="item.result_text" :type="item.result_type" size="small" />
+									<text v-if="tabActive === 0 && item.status < 3" class="btn-complete" @click.stop="toRecordRepair(item)">记录维修</text>
+								</view>
 							</view>
 							<text class="item-desc">{{ item.fault_description }}</text>
 							<view class="item-meta">
-								<text class="item-date">{{ formatDate(item.created_at) }}</text>
-								<text class="item-urgency" v-if="item.urgency">紧急: {{ ['','一般','紧急','非常紧急'][item.urgency] }}</text>
+								<text class="item-date">{{ formatDate(item.created_at || item.repair_date) }}</text>
+								<text class="item-urgency" v-if="tabActive === 0 && item.urgency">紧急: {{ ['','一般','紧急','非常紧急'][item.urgency] }}</text>
+								<text class="item-urgency" v-if="tabActive === 1 && item.cost">费用: ¥{{ item.cost }}</text>
 							</view>
 						</view>
 					</template>
@@ -43,13 +48,19 @@ const statusMap = {
 	3: { text: '已完成', type: 'success' },
 	4: { text: '已关闭', type: 'info' }
 }
+const resultMap = {
+	1: { text: '已修复', type: 'success' },
+	2: { text: '部分修复', type: 'warning' },
+	3: { text: '无法修复', type: 'error' }
+}
 export default {
 	data() {
 		const uid = store.userInfo?._id || ''
 		return {
 			tabActive: 0,
 			where: uid ? 'deleted == 0 && creator == "' + uid + '"' : 'deleted == 0',
-			deviceId: ''
+			deviceId: '',
+			myRequestIds: []
 		}
 	},
 	computed: {
@@ -60,22 +71,45 @@ export default {
 			return store.userInfo?._id || ''
 		}
 	},
-	onLoad(e) {
-		this.where = 'deleted == 0 && creator == "' + this.uid + '"'
-		if (e.device_id) {
-			this.deviceId = e.device_id
-			this.where += ' && device_id == "' + e.device_id + '"'
-		}
+	async onLoad(e) {
+		this.deviceId = e.device_id || ''
+		await this.loadMyRequestIds()
+		this.buildWhere(0)
 	},
 	methods: {
-		switchTab(i) {
+		async loadMyRequestIds() {
+			try {
+				const res = await db.collection('medical-device-repair-request')
+					.where({ deleted: 0, creator: this.uid })
+					.field('_id').get()
+				this.myRequestIds = (res.result.data || []).map(i => i._id)
+			} catch (e) {
+				console.error(e)
+				this.myRequestIds = []
+			}
+		},
+		async switchTab(i) {
 			this.tabActive = i
-			let where = 'deleted == 0 && creator == "' + this.uid + '"'
-			if (this.deviceId) where += ' && device_id == "' + this.deviceId + '"'
-			this.where = where
+			this.buildWhere(i)
+		},
+		buildWhere(tab) {
+			if (tab === 0) {
+				let where = 'deleted == 0 && creator == "' + this.uid + '"'
+				if (this.deviceId) where += ' && device_id == "' + this.deviceId + '"'
+				this.where = where
+			} else {
+				let where = 'deleted == 0 && repair_request_id in ["' + this.myRequestIds.join('","') + '"]'
+				if (this.deviceId) where += ' && device_id == "' + this.deviceId + '"'
+				this.where = where
+			}
 		},
 		loadMore() { this.$refs.udb?.loadMore() },
 		toAdd() { uni.navigateTo({ url: '/pages/repair-request/add' + (this.deviceId ? '?device_id=' + this.deviceId : '') }) },
+		toRecordRepair(item) {
+			uni.navigateTo({
+				url: '/pages/repair-request/repair-add?request_id=' + item._id + '&device_id=' + item.device_id + '&device_name=' + (item.device_name || '') + '&fault_description=' + encodeURIComponent(item.fault_description || '')
+			})
+		},
 		formatDate(ts) { return ts ? new Date(ts).toLocaleDateString('zh-CN') : '' },
 		onLoad(data) {
 			if (data && data.length) {
@@ -92,6 +126,12 @@ export default {
 						i.status_text = s?.text || '未知'
 						i.status_type = s?.type || 'default'
 					})
+				} else {
+					data.forEach(i => {
+						const r = resultMap[i.result]
+						i.result_text = r?.text || '未知'
+						i.result_type = r?.type || 'default'
+					})
 				}
 			}
 		}
@@ -107,7 +147,9 @@ export default {
 .list { padding: 0 20rpx; }
 .item { display: flex; flex-direction: column; gap: 8rpx; padding: 6rpx 0; }
 .item-top { display: flex; justify-content: space-between; align-items: center; }
+.item-top-right { display: flex; align-items: center; gap: 12rpx; }
 .item-device { font-size: 28rpx; font-weight: 600; color: #1e293b; }
+.btn-complete { font-size: 22rpx; color: #fff; background: #10b981; padding: 6rpx 18rpx; border-radius: 8rpx; white-space: nowrap; &:active { opacity: 0.8; } }
 .item-desc { font-size: 24rpx; color: #666; }
 .item-meta { display: flex; gap: 20rpx; }
 .item-date, .item-urgency { font-size: 22rpx; color: #94a3b8; }

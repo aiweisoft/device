@@ -11,7 +11,7 @@
 			"path": "pages/device/device-list",
 			"style": {
 				"navigationBarTitleText": "设备列表",
-				"enablePullDownRefresh": false,
+				"enablePullDownRefresh": true,
 				"navigationBarBackgroundColor": "#6366f1",
 				"navigationBarTextStyle": "white"
 			}
@@ -45,6 +45,12 @@
 			"path": "pages/repair-request/add",
 			"style": {
 				"navigationBarTitleText": "发起报修"
+			}
+		},
+		{
+			"path": "pages/repair-request/repair-add",
+			"style": {
+				"navigationBarTitleText": "记录维修"
 			}
 		},
 		{
@@ -126,6 +132,22 @@
 				"style": {
 					"navigationBarTitleText": "意见反馈",
 					"enablePullDownRefresh": false
+				}
+			}, {
+				"path": "pages/opendb-feedback/list",
+				"style": {
+					"navigationBarTitleText": "我的反馈",
+					"enablePullDownRefresh": true
+				}
+			}, {
+				"path": "pages/opendb-feedback/detail",
+				"style": {
+					"navigationBarTitleText": "反馈详情"
+				}
+			}, {
+				"path": "pages/opendb-feedback/edit",
+				"style": {
+					"navigationBarTitleText": "编辑反馈"
 				}
 			}]
 		},
@@ -281,6 +303,7 @@
 			"/uni_modules/uni-id-pages/pages/userinfo/userinfo",
 			"/pages/repair-request/add",
 			"/pages/repair-request/list",
+			"/pages/repair-request/repair-add",
 			"/pages/alert/list"
 		],
 		"resToLogin": true

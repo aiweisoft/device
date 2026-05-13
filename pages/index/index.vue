@@ -80,6 +80,7 @@
 			<view class="chart-card">
 				<view class="section-title">
 					<text class="section-title-text">设备状态统计</text>
+					<text class="status-total">{{ statusTotal }}台</text>
 				</view>
 				<view class="status-list" v-if="statusDeviceStats.length">
 					<view class="status-item" v-for="(item, i) in statusDeviceStats" :key="i">
@@ -105,6 +106,7 @@
 		<view class="category-section" v-if="!loading">
 			<view class="section-title">
 				<text class="section-title-text">设备分类统计</text>
+				<text class="status-total">{{ categoryTotal }}台</text>
 			</view>
 			<view class="category-list" v-if="categoryStats.length">
 				<view class="category-item" v-for="(item, i) in categoryStats" :key="i" @click="toDeviceList">
@@ -143,9 +145,9 @@
 					<view class="alert-dot" :class="item.is_read ? 'dot-read' : 'dot-unread'"></view>
 					<view class="alert-content">
 						<text class="alert-title">{{ item.title }}</text>
-						<text class="alert-desc">{{ item.description || item.content }}</text>
+						<text class="alert-desc">{{ item.description }}</text>
 					</view>
-					<uni-dateformat :date="item.alert_date || item.create_date" format="MM-dd" :threshold="[86400000, 604800000]" />
+					<uni-dateformat :date="item.alert_date || item.created_at" format="MM-dd" :threshold="[86400000, 604800000]" />
 				</view>
 			</view>
 		</view>
@@ -195,19 +197,13 @@ export default {
 				{ label: '设备总数', count: 0, color: '#4f46e5', bgColor: '#eef2ff', icon: 'list', status: '' },
 				{ label: '使用中', count: 0, color: '#059669', bgColor: '#ecfdf5', icon: 'checkmarkempty', status: 2 },
 				{ label: '维修中', count: 0, color: '#d97706', bgColor: '#fffbeb', icon: 'undo', status: 3 },
-				{ label: '待处理报修', count: 0, color: '#dc2626', bgColor: '#fef2f2', icon: 'paperplane', status: 'pending-repair' },
-				{ label: '待保养', count: 0, color: '#0891b2', bgColor: '#ecfeff', icon: 'calendar', status: 'pending-maintenance' },
-				{ label: '保修过期', count: 0, color: '#6b7280', bgColor: '#f3f4f6', icon: 'closeempty', status: '' }
+				{ label: '待处理报修', count: 0, color: '#dc2626', bgColor: '#fef2f2', icon: 'paperplane', status: 'pending-repair' }
 			],
 			actions: [
-				{ label: '扫一扫', icon: 'scan', bgColor: '#6366f1', action: 'toScan' },
 				{ label: '设备列表', icon: 'list', bgColor: '#10b981', action: 'toDeviceList' },
 				{ label: '提交报修', icon: 'paperplane', bgColor: '#f59e0b', action: 'toAddRepair' },
-				{ label: '我的报修', icon: 'chatboxes', bgColor: '#8b5cf6', action: 'toRepairs' },
-				{ label: '保养提醒', icon: 'notification', bgColor: '#ef4444', action: 'toAlerts' },
 				{ label: '维修记录', icon: 'search', bgColor: '#06b6d4', action: 'toRepairHistory' },
-				{ label: '扫码记录', icon: 'eye', bgColor: '#f97316', action: 'toScanHistory' },
-				{ label: '个人中心', icon: 'person', bgColor: '#14b8a6', action: 'toProfile' }
+				{ label: '保养提醒', icon: 'notification', bgColor: '#ef4444', action: 'toAlerts' }
 			],
 			recentAlerts: [],
 			categoryStats: [],
@@ -245,7 +241,13 @@ export default {
 			return uniCloud.getCurrentUserInfo().tokenExpired > Date.now()
 		},
 		deptTotal() {
-			return this.deptDeviceStats.reduce((s, d) => s + d.count, 0)
+			return (this.stats[0] && this.stats[0].count) || 0
+		},
+		statusTotal() {
+			return this.statusDeviceStats.reduce((s, d) => s + d.count, 0)
+		},
+		categoryTotal() {
+			return this.categoryStats.reduce((s, d) => s + d.count, 0)
 		},
 		canvasSize() {
 			return uni.upx2px ? uni.upx2px(180) : 90
@@ -280,30 +282,23 @@ export default {
 		},
 		async loadStats() {
 			try {
-				const now = Date.now()
 				const [
 					totalRes,
 					normalRes,
 					repairRes,
-					pendingRepairRes,
-					pendingMaintRes,
-					warrantyExpiredRes
+					pendingRepairRes
 				] = await Promise.all([
 					db.collection('medical-device').where('deleted == 0').count(),
 					db.collection('medical-device').where('deleted == 0 && status == 2').count(),
 					db.collection('medical-device').where('deleted == 0 && status == 3').count(),
-					db.collection('medical-device-repair-request').where('deleted == 0 && status == 1').count(),
-					db.collection('medical-device-maintenance').where('deleted == 0 && status != 2 && plan_date < ' + now).count(),
-					db.collection('medical-device').where('deleted == 0 && warranty_end < ' + now).count()
+					db.collection('medical-device-repair-request').where('deleted == 0 && status == 1').count()
 				])
 				const getCount = (res) => res?.total ?? res?.result?.total ?? 0
 				this.stats = [
 					{ label: '设备总数', count: getCount(totalRes), color: '#4f46e5', bgColor: '#eef2ff', icon: 'list', status: '' },
 					{ label: '使用中', count: getCount(normalRes), color: '#059669', bgColor: '#ecfdf5', icon: 'checkmarkempty', status: 2 },
 					{ label: '维修中', count: getCount(repairRes), color: '#d97706', bgColor: '#fffbeb', icon: 'undo', status: 3 },
-					{ label: '待处理报修', count: getCount(pendingRepairRes), color: '#dc2626', bgColor: '#fef2f2', icon: 'paperplane', status: 'pending-repair' },
-					{ label: '待保养', count: getCount(pendingMaintRes), color: '#0891b2', bgColor: '#ecfeff', icon: 'calendar', status: 'pending-maintenance' },
-					{ label: '保修过期', count: getCount(warrantyExpiredRes), color: '#6b7280', bgColor: '#f3f4f6', icon: 'closeempty', status: '' }
+					{ label: '待处理报修', count: getCount(pendingRepairRes), color: '#dc2626', bgColor: '#fef2f2', icon: 'paperplane', status: 'pending-repair' }
 				]
 			} catch (e) {
 				console.error('loadStats error:', e)
@@ -315,6 +310,7 @@ export default {
 				const res = await db.collection('medical-device')
 					.where('deleted == 0')
 					.field('category_id')
+					.limit(10000)
 					.get({ getCount: false })
 				const devices = res.data || res.result?.data || []
 				if (!devices.length) { this.categoryStats = []; return }
@@ -354,6 +350,7 @@ export default {
 				const res = await db.collection('medical-device')
 					.where('deleted == 0')
 					.field('dept_id')
+					.limit(10000)
 					.get({ getCount: false })
 				const devices = res.data || res.result?.data || []
 				if (!devices.length) { this.deptDeviceStats = []; return }
@@ -364,11 +361,12 @@ export default {
 					countMap[id] = (countMap[id] || 0) + 1
 				})
 
-				const sorted = Object.entries(countMap)
+				const allEntries = Object.entries(countMap)
 					.sort((a, b) => b[1] - a[1])
-					.slice(0, 8)
+				const top8 = allEntries.slice(0, 8)
+				const otherCount = allEntries.slice(8).reduce((s, [, c]) => s + c, 0)
 
-				const ids = sorted.map(([id]) => id).filter(Boolean)
+				const ids = top8.map(([id]) => id).filter(Boolean)
 				let deptMap = {}
 				if (ids.length) {
 					const deptRes = await db.collection('opendb-department')
@@ -379,41 +377,37 @@ export default {
 					deptMap = Object.fromEntries(depts.map(d => [d._id, d.name]))
 				}
 
-				this.deptDeviceStats = sorted.map(([id, count], i) => {
+				const list = top8.map(([id, count], i) => {
 					const name = id ? (deptMap[id] || '未知科室') : '未分配'
 					return { name, count, color: this.deptColors[i % this.deptColors.length] }
 				})
+				if (otherCount > 0) {
+					list.push({ name: '其他科室', count: otherCount, color: '#d1d5db' })
+				}
+				this.deptDeviceStats = list
 			} catch (e) {
 				console.error('loadDeptDeviceStats error:', e)
 			}
 		},
 		async loadStatusDeviceStats() {
 			try {
-				const res = await db.collection('medical-device')
-					.where('deleted == 0')
-					.field('status')
-					.get({ getCount: false })
-				const devices = res.data || res.result?.data || []
-
-				const countMap = {}
-				devices.forEach(d => {
-					const s = d.status || 0
-					countMap[s] = (countMap[s] || 0) + 1
-				})
-
-				const maxCount = Math.max(...Object.values(countMap), 1)
-				const sortedKeys = Object.entries(this.statusConfig).sort((a, b) => a[0] - b[0])
-				const ordered = []
-				for (const [key, cfg] of sortedKeys) {
-					const count = countMap[key] || 0
-					ordered.push({
+				const results = await Promise.all(
+					[1, 2, 3, 4, 5, 6].map(status =>
+						db.collection('medical-device').where('deleted == 0 && status == ' + status).count()
+					)
+				)
+				const getCount = (res) => res?.total ?? res?.result?.total ?? 0
+				const counts = results.map(getCount)
+				const maxCount = Math.max(...counts, 1)
+				this.statusDeviceStats = [1, 2, 3, 4, 5, 6].map((key, i) => {
+					const cfg = this.statusConfig[key]
+					return {
 						label: cfg.label,
-						count,
+						count: counts[i],
 						color: cfg.color,
-						percent: Math.round(count / maxCount * 100)
-					})
-				}
-				this.statusDeviceStats = ordered
+						percent: Math.round(counts[i] / maxCount * 100)
+					}
+				})
 			} catch (e) {
 				console.error('loadStatusDeviceStats error:', e)
 			}
@@ -462,7 +456,7 @@ export default {
 		async loadRecentAlerts() {
 			try {
 				const res = await db.collection('medical-device-alert')
-					.where('is_read == 0')
+					.where('deleted == 0 && is_read == 0')
 					.orderBy('alert_date', 'desc')
 					.limit(5)
 					.get()
@@ -508,6 +502,9 @@ export default {
 				toProfile: () => uni.switchTab({ url: '/pages/ucenter/ucenter' })
 			}
 			;(map[name] || (() => {}))()
+		},
+		toDeviceList() {
+			uni.switchTab({ url: '/pages/device/device-list' })
 		},
 		toUserOrLogin() {
 			if (this.hasLogin) {
@@ -960,5 +957,10 @@ export default {
 	height: 100%;
 	border-radius: 7rpx;
 	transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.status-total {
+	font-size: 22rpx;
+	color: #999;
+	font-weight: 500;
 }
 </style>
