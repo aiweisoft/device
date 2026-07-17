@@ -4,7 +4,7 @@
 	"permission": {
 		"read": true,
 		"create": "'CREATE_MEDICAL_DEVICE' in auth.permission",
-		"update": "'UPDATE_MEDICAL_DEVICE' in auth.permission",
+		"update": "'UPDATE_MEDICAL_DEVICE' in auth.permission || auth.uid != null",
 		"delete": "'DELETE_MEDICAL_DEVICE' in auth.permission"
 	},
 	"properties": {
@@ -91,9 +91,8 @@
 			"enum": [1, 2, 3, 4, 5, 6]
 		},
 		"image_url": {
-			"bsonType": "string",
-			"description": "设备照片URL",
-			"trim": "both"
+			"bsonType": "array",
+			"description": "设备照片URL列表"
 		},
 		"qr_code": {
 			"bsonType": "string",

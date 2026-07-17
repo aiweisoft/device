@@ -51,9 +51,9 @@
 			return {
 				formData,
 				formOptions: {},
-				rules: {
-					...getValidator(Object.keys(formData))
-				}
+			rules: {
+				...getValidator(Object.keys(formData))
+			}
 			}
 		},
 		onReady() {

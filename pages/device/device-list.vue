@@ -4,7 +4,7 @@
 			<uni-search-bar v-model="keyword" radius="100" cancelButton="none" placeholder="搜索设备编号/名称" @confirm="search" />
 		</view>
 		<view class="filter-bar">
-			<uni-data-select v-model="filterCategory" :localdata="categoryOptions" placeholder="全部分类" clear @change="search" />
+			<uni-data-select v-model="filterDept" :localdata="deptOptions" placeholder="全部部门" clear @change="search" />
 			<uni-data-select v-model="filterStatus" :localdata="statusOptions" placeholder="全部状态" clear @change="search" />
 		</view>
 		<unicloud-db ref="udb" collection="medical-device" :where="where" :getcount="true" page-data="add"
@@ -54,11 +54,11 @@ export default {
 	data() {
 		return {
 			keyword: '',
-			filterCategory: '',
+			filterDept: '',
 			filterStatus: '',
 			where: 'deleted == 0',
 			loadingMore: false,
-			categoryOptions: [],
+			deptOptions: [],
 			statusOptions: Object.entries(statusMap).map(([k, v]) => ({ value: Number(k), text: v.text }))
 		}
 	},
@@ -68,18 +68,25 @@ export default {
 			this.search()
 		}
 	},
+	onPullDownRefresh() {
+		this.$refs.udb?.loadData({ clear: true }).then(() => {
+			uni.stopPullDownRefresh()
+		}).catch(() => {
+			uni.stopPullDownRefresh()
+		})
+	},
 	onReachBottom() {
 		if (this.loadingMore) return
 		this.loadMore()
 	},
 	onReady() {
-		this.loadCategoryOptions()
+		this.loadDeptOptions()
 	},
 	methods: {
-		async loadCategoryOptions() {
+		async loadDeptOptions() {
 			try {
-				const res = await db.collection('medical-device-category').where('deleted == 0').get()
-				this.categoryOptions = (res.result.data || []).map(item => ({ value: item._id, text: item.name }))
+				const res = await db.collection('opendb-department').limit(10000).get()
+				this.deptOptions = (res.result.data || []).map(item => ({ value: item._id, text: item.name }))
 			} catch (e) { console.error(e) }
 		},
 		getStatusText(s) { return statusMap[s]?.text || '未知' },
@@ -100,7 +107,7 @@ export default {
 				const q = this.keyword.trim()
 				cond.push(`/${q}/.test(name) || /${q}/.test(code) || /${q}/.test(brand) || /${q}/.test(model)`)
 			}
-			if (this.filterCategory) cond.push(`category_id == "${this.filterCategory}"`)
+			if (this.filterDept) cond.push(`dept_id == "${this.filterDept}"`)
 			if (this.filterStatus) cond.push(`status == ${this.filterStatus}`)
 			this.where = cond.join(' && ')
 			this.$nextTick(() => this.$refs.udb?.loadData({ clear: true }))

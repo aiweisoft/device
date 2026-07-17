@@ -53,8 +53,10 @@
 
 <style>
 	/*每个页面公共css */
+	/* #ifndef APP-NVUE */
 	@font-face {
 		font-family: uniicons;
 		src: url('~@/static/uni.ttf');
 	}
+	/* #endif */
 </style>

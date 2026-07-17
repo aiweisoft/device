@@ -1,1 +1,105 @@
-{"bsonType":"object","required":["device_id","fault_description"],"title":"设备报修","permission":{"read":true,"create":"auth.uid != null","update":"'UPDATE_MEDICAL_DEVICE_REPAIR_REQUEST' in auth.permission || 'app_maintainer' in auth.role || 'app_admin' in auth.role","delete":"'DELETE_MEDICAL_DEVICE_REPAIR_REQUEST' in auth.permission || 'app_admin' in auth.role"},"properties":{"_id":{"description":"存储文档 ID，系统自动生成"},"device_id":{"bsonType":"string","description":"设备ID","foreignKey":"medical-device._id","trim":"both"},"request_date":{"bsonType":"timestamp","description":"报修日期"},"requester":{"bsonType":"string","description":"报修人","trim":"both"},"phone":{"bsonType":"string","description":"联系电话","trim":"both"},"fault_description":{"bsonType":"string","description":"故障描述","trim":"both"},"urgency":{"bsonType":"int","description":"紧急程度:1-一般,2-紧急,3-非常紧急","defaultValue":1,"enum":[1,2,3]},"status":{"bsonType":"int","description":"处理状态:1-待处理,2-处理中,3-已完成,4-已关闭","defaultValue":1,"enum":[1,2,3,4]},"handler":{"bsonType":"string","description":"处理人","trim":"both"},"handle_date":{"bsonType":"timestamp","description":"处理时间"},"handle_result":{"bsonType":"string","description":"处理结果","trim":"both"},"remark":{"bsonType":"string","description":"备注","trim":"both"},"creator":{"bsonType":"string","description":"创建人ID","foreignKey":"uni-id-users._id"},"created_at":{"bsonType":"timestamp","description":"创建时间","forceDefaultValue":{"$env":"now"}},"updater":{"bsonType":"string","description":"更新人ID","foreignKey":"uni-id-users._id"},"updated_at":{"bsonType":"timestamp","description":"更新时间","forceDefaultValue":{"$env":"now"}},"deleted":{"bsonType":"int","description":"是否删除:0-否,1-是","defaultValue":0,"enum":[0,1]}}}
+{
+	"bsonType": "object",
+	"required": ["device_id", "fault_description"],
+	"title": "设备报修",
+	"permission": {
+		"read": true,
+		"create": "'CREATE_MEDICAL_DEVICE_REPAIR_REQUEST' in auth.permission || auth.uid != null",
+		"update": "'UPDATE_MEDICAL_DEVICE_REPAIR_REQUEST' in auth.permission || auth.uid != null",
+		"delete": "'DELETE_MEDICAL_DEVICE_REPAIR_REQUEST' in auth.permission || auth.uid != null"
+	},
+	"properties": {
+		"_id": {
+			"description": "存储文档 ID，系统自动生成"
+		},
+		"device_id": {
+			"bsonType": "string",
+			"description": "设备ID",
+			"foreignKey": "medical-device._id",
+			"trim": "both"
+		},
+		"request_date": {
+			"bsonType": "timestamp",
+			"description": "报修日期",
+			"forceDefaultValue": {
+				"$env": "now"
+			}
+		},
+		"requester": {
+			"bsonType": "string",
+			"description": "报修人",
+			"trim": "both"
+		},
+		"phone": {
+			"bsonType": "string",
+			"description": "联系电话",
+			"trim": "both"
+		},
+		"fault_description": {
+			"bsonType": "string",
+			"description": "故障描述",
+			"trim": "both"
+		},
+		"urgency": {
+			"bsonType": "int",
+			"description": "紧急程度:1-一般,2-紧急,3-非常紧急",
+			"defaultValue": 1,
+			"enum": [1, 2, 3]
+		},
+		"status": {
+			"bsonType": "int",
+			"description": "处理状态:1-待处理,2-处理中,3-已完成,4-已关闭",
+			"defaultValue": 1,
+			"enum": [1, 2, 3, 4]
+		},
+		"handler": {
+			"bsonType": "string",
+			"description": "处理人",
+			"trim": "both"
+		},
+		"handle_date": {
+			"bsonType": "timestamp",
+			"description": "处理时间"
+		},
+		"handle_result": {
+			"bsonType": "string",
+			"description": "处理结果",
+			"trim": "both"
+		},
+		"remark": {
+			"bsonType": "string",
+			"description": "备注",
+			"trim": "both"
+		},
+		"creator": {
+			"bsonType": "string",
+			"description": "创建人ID",
+			"foreignKey": "uni-id-users._id"
+		},
+		"created_at": {
+			"bsonType": "timestamp",
+			"description": "创建时间",
+			"forceDefaultValue": {
+				"$env": "now"
+			}
+		},
+		"updater": {
+			"bsonType": "string",
+			"description": "更新人ID",
+			"foreignKey": "uni-id-users._id"
+		},
+		"updated_at": {
+			"bsonType": "timestamp",
+			"description": "更新时间",
+			"forceDefaultValue": {
+				"$env": "now"
+			}
+		},
+		"deleted": {
+			"bsonType": "int",
+			"description": "是否删除:0-否,1-是",
+			"defaultValue": 0,
+			"enum": [0, 1]
+		}
+	}
+}

@@ -1,0 +1,17 @@
+{
+	"name": "medical-device-repair-co",
+	"version": "1.0.0",
+	"description": "设备报修云对象，原子化处理报修创建+设备状态更新",
+	"main": "index.obj.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"author": "",
+	"license": "ISC",
+	"cloudfunction-config": {
+		"concurrency": 10,
+		"memorySize": 256,
+		"timeout": 30
+	},
+	"extensions": {}
+}

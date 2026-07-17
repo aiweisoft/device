@@ -70,7 +70,7 @@
 		},
 		data() {
 			return {
-				version: "V1.0.0",
+				version: "V1.1.0",
 				year: "2020",
 				about: {}
 			};

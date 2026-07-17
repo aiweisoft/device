@@ -201,8 +201,8 @@ export default {
 			],
 			actions: [
 				{ label: '设备列表', icon: 'list', bgColor: '#10b981', action: 'toDeviceList' },
-				{ label: '提交报修', icon: 'paperplane', bgColor: '#f59e0b', action: 'toAddRepair' },
-				{ label: '维修记录', icon: 'search', bgColor: '#06b6d4', action: 'toRepairHistory' },
+				{ label: '我的报修', icon: 'paperplane', bgColor: '#f59e0b', action: 'toMyRepair' },
+				{ label: '维修记录', icon: 'search', bgColor: '#8b5cf6', action: 'toRepairRecords' },
 				{ label: '保养提醒', icon: 'notification', bgColor: '#ef4444', action: 'toAlerts' }
 			],
 			recentAlerts: [],
@@ -480,7 +480,7 @@ export default {
 		},
 		navigateToStat(item) {
 			const routes = {
-				'pending-repair': '/pages/repair-request/list',
+				'pending-repair': '/pages/repair-request/repair',
 				'pending-maintenance': '/pages/alert/list'
 			}
 			const route = routes[item.status]
@@ -494,10 +494,12 @@ export default {
 			const map = {
 				toScan: () => uni.navigateTo({ url: '/pages/device/scan' }),
 				toDeviceList: () => uni.switchTab({ url: '/pages/device/device-list' }),
-				toAddRepair: () => uni.navigateTo({ url: '/pages/repair-request/add' }),
-				toRepairs: () => uni.navigateTo({ url: '/pages/repair-request/list' }),
+				toMyRepair: () => uni.navigateTo({ url: '/pages/repair-request/repair' }),
+				toAddRepair: () => uni.navigateTo({ url: '/pages/repair-request/repair' }),
+				toRepairRequests: () => uni.navigateTo({ url: '/pages/repair-request/repair' }),
+				toRepairRecords: () => uni.navigateTo({ url: '/pages/repair-request/list?tab=1' }),
+				toRepairHistory: () => uni.navigateTo({ url: '/pages/repair-request/list?tab=1' }),
 				toAlerts: () => uni.navigateTo({ url: '/pages/alert/list' }),
-				toRepairHistory: () => uni.navigateTo({ url: '/pages/repair-request/list' }),
 				toScanHistory: () => uni.navigateTo({ url: '/pages/device/scan' }),
 				toProfile: () => uni.switchTab({ url: '/pages/ucenter/ucenter' })
 			}

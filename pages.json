@@ -38,7 +38,8 @@
 		{
 			"path": "pages/repair-request/list",
 			"style": {
-				"navigationBarTitleText": "报修与维修"
+				"navigationBarTitleText": "报修与维修",
+				"enablePullDownRefresh": true
 			}
 		},
 		{
@@ -48,9 +49,27 @@
 			}
 		},
 		{
+			"path": "pages/repair-request/detail",
+			"style": {
+				"navigationBarTitleText": "报修详情"
+			}
+		},
+		{
 			"path": "pages/repair-request/repair-add",
 			"style": {
 				"navigationBarTitleText": "记录维修"
+			}
+		},
+		{
+			"path": "pages/repair-request/repair-detail",
+			"style": {
+				"navigationBarTitleText": "维修详情"
+			}
+		},
+		{
+			"path": "pages/repair-request/repair",
+			"style": {
+				"navigationBarTitleText": "我的报修"
 			}
 		},
 		{
@@ -301,9 +320,12 @@
 		"loginPage": "uni_modules/uni-id-pages/pages/login/login-withoutpwd",
 		"needLogin": [
 			"/uni_modules/uni-id-pages/pages/userinfo/userinfo",
-			"/pages/repair-request/add",
 			"/pages/repair-request/list",
+			"/pages/repair-request/add",
+			"/pages/repair-request/detail",
 			"/pages/repair-request/repair-add",
+			"/pages/repair-request/repair-detail",
+			"/pages/repair-request/repair",
 			"/pages/alert/list"
 		],
 		"resToLogin": true
