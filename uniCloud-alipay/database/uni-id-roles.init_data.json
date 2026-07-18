@@ -5,5 +5,12 @@
     "permission": [],
     "comment": "超级管理员拥有所有权限",
     "create_date": 0
+  },
+  {
+    "role_id": "repair_user",
+    "role_name": "报修用户",
+    "permission": [],
+    "comment": "默认角色，新用户注册自动分配",
+    "create_date": 0
   }
 ]

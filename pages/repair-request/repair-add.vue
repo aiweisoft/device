@@ -42,6 +42,7 @@
 
 <script>
 const db = uniCloud.database();
+import { store } from '@/uni_modules/uni-id-pages/common/store.js';
 
 export default {
 	data() {
@@ -156,7 +157,8 @@ export default {
 				} else {
 					await db.collection('medical-device-repair').add({
 						...repairData,
-						deleted: 0
+						deleted: 0,
+						creator: store.userInfo?._id || ''
 					});
 				}
 				const promises = [];

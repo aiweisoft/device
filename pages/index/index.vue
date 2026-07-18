@@ -495,10 +495,7 @@ export default {
 				toScan: () => uni.navigateTo({ url: '/pages/device/scan' }),
 				toDeviceList: () => uni.switchTab({ url: '/pages/device/device-list' }),
 				toMyRepair: () => uni.navigateTo({ url: '/pages/repair-request/repair' }),
-				toAddRepair: () => uni.navigateTo({ url: '/pages/repair-request/repair' }),
-				toRepairRequests: () => uni.navigateTo({ url: '/pages/repair-request/repair' }),
 				toRepairRecords: () => uni.navigateTo({ url: '/pages/repair-request/list?tab=1' }),
-				toRepairHistory: () => uni.navigateTo({ url: '/pages/repair-request/list?tab=1' }),
 				toAlerts: () => uni.navigateTo({ url: '/pages/alert/list' }),
 				toScanHistory: () => uni.navigateTo({ url: '/pages/device/scan' }),
 				toProfile: () => uni.switchTab({ url: '/pages/ucenter/ucenter' })

@@ -85,11 +85,10 @@ const urgencyMap = {
 };
 
 export default {
-	data() {
+		data() {
 		const uid = store.userInfo?._id || '';
 		const userInfo = store.userInfo || {};
 		return {
-			tabs: ['申请报修', '我的报修'],
 			tabIndex: 0,
 			formData: {
 				device_id: '',
@@ -136,6 +135,12 @@ export default {
 		};
 	},
 	computed: {
+		isMaintainer() {
+			return store.hasLogin && store.userInfo.role?.includes('app_maintainer');
+		},
+		tabs() {
+			return this.isMaintainer ? ['我的报修'] : ['申请报修', '我的报修'];
+		},
 		uid() {
 			return store.userInfo?._id || '';
 		}

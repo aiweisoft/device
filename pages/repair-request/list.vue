@@ -74,7 +74,6 @@ const resultMap = {
 
 export default {
 	data() {
-		const uid = store.userInfo?._id || '';
 		return {
 			tabs: ['我的报修', '维修记录'],
 			tabIndex: 0,
@@ -97,6 +96,26 @@ export default {
 		this.deviceId = e.device_id || '';
 		const targetTab = e.tab != null ? Number(e.tab) || 0 : 0;
 		this.loadMyRequestIds().then(() => {
+			this.buildWhere(targetTab);
+			if (targetTab !== this.tabIndex) this.tabIndex = targetTab;
+		});
+		uni.$on('repair-refresh', () => {
+			this.loadData(true);
+		});
+	},
+	computed: {
+		collectionName() {
+			return this.tabIndex === 0 ? 'medical-device-repair-request' : 'medical-device-repair';
+		},
+		uid() {
+			return store.userInfo?._id || '';
+		}
+	},
+	onLoad(e) {
+		this.deviceId = e.device_id || '';
+		const targetTab = e.tab != null ? Number(e.tab) || 0 : 0;
+		const load = this.isMaintainer ? Promise.resolve() : this.loadMyRequestIds();
+		load.then(() => {
 			this.buildWhere(targetTab);
 			if (targetTab !== this.tabIndex) this.tabIndex = targetTab;
 		});
