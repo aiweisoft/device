@@ -63,12 +63,18 @@
 			return {
 			gridList: [],
 				ucenterList: [
-					[{
-						"title": "我的报修",
-						"to": '/pages/repair-request/list',
-						"icon": "paperplane"
-					}, {
-						"title": "提醒消息",
+				[{
+					"title": "我的报修",
+					"to": '',
+					"event": "toMyRepair",
+					"icon": "paperplane"
+				}, {
+					"title": "维修记录",
+					"to": '',
+					"event": "toRepairRecords",
+					"icon": "search"
+				}, {
+					"title": "提醒消息",
 						"to": '/pages/alert/list',
 						"icon": "notification"
 					}, {
@@ -125,6 +131,9 @@
 			hasLogin(){
 				return store.hasLogin
 			},
+			isMaintainer() {
+				return store.hasLogin && store.userInfo.role?.includes('app_maintainer');
+			},
 			// #ifdef APP-PLUS
 			appVersion() {
 				return getApp().appVersion
@@ -150,7 +159,23 @@
 			 * 个人中心项目列表点击事件
 			 */
 			ucenterListClick(item) {
-				if (!item.to && item.event) {
+				if (item.event) {
+					if (item.event === 'toMyRepair') {
+						if (this.isMaintainer) {
+							uni.showToast({ title: '仅报修用户可用', icon: 'none' });
+							return;
+						}
+						uni.navigateTo({ url: '/pages/repair-request/repair' });
+						return;
+					}
+					if (item.event === 'toRepairRecords') {
+						if (!this.isMaintainer) {
+							uni.showToast({ title: '仅维修用户可用', icon: 'none' });
+							return;
+						}
+						uni.navigateTo({ url: '/pages/repair-request/list?tab=1' });
+						return;
+					}
 					this[item.event]();
 				}
 			},

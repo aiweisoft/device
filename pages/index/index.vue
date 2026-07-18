@@ -222,6 +222,9 @@ export default {
 		}
 	},
 	computed: {
+		isMaintainer() {
+			return store.hasLogin && store.userInfo.role?.includes('app_maintainer');
+		},
 		userName() {
 			const info = store.userInfo
 			return info && (info.nickname || info.username || info.mobile)
@@ -491,6 +494,14 @@ export default {
 			}
 		},
 		execAction(name) {
+			if (name === 'toMyRepair' && this.isMaintainer) {
+				uni.showToast({ title: '仅报修用户可用', icon: 'none' });
+				return;
+			}
+			if (name === 'toRepairRecords' && !this.isMaintainer) {
+				uni.showToast({ title: '仅维修用户可用', icon: 'none' });
+				return;
+			}
 			const map = {
 				toScan: () => uni.navigateTo({ url: '/pages/device/scan' }),
 				toDeviceList: () => uni.switchTab({ url: '/pages/device/device-list' }),

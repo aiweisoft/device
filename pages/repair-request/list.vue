@@ -75,89 +75,63 @@ const resultMap = {
 export default {
 	data() {
 		return {
-			tabs: ['我的报修', '维修记录'],
+			tabs: ['新的报修', '维修记录'],
 			tabIndex: 0,
 			orderby: 'request_date desc',
-			where: { deleted: 0 },
+			where: { deleted: 0, _id: '__sentinel__' },
 			deviceId: '',
-			myRequestIds: [],
+			repairedIds: [],
 			tableData: []
 		};
 	},
 	computed: {
 		collectionName() {
 			return this.tabIndex === 0 ? 'medical-device-repair-request' : 'medical-device-repair';
-		},
-		uid() {
-			return store.userInfo?._id || '';
 		}
 	},
 	onLoad(e) {
 		this.deviceId = e.device_id || '';
 		const targetTab = e.tab != null ? Number(e.tab) || 0 : 0;
-		this.loadMyRequestIds().then(() => {
+		this.loadRepairedIds().then(() => {
 			this.buildWhere(targetTab);
 			if (targetTab !== this.tabIndex) this.tabIndex = targetTab;
 		});
 		uni.$on('repair-refresh', () => {
-			this.loadData(true);
-		});
-	},
-	computed: {
-		collectionName() {
-			return this.tabIndex === 0 ? 'medical-device-repair-request' : 'medical-device-repair';
-		},
-		uid() {
-			return store.userInfo?._id || '';
-		}
-	},
-	onLoad(e) {
-		this.deviceId = e.device_id || '';
-		const targetTab = e.tab != null ? Number(e.tab) || 0 : 0;
-		const load = this.isMaintainer ? Promise.resolve() : this.loadMyRequestIds();
-		load.then(() => {
-			this.buildWhere(targetTab);
-			if (targetTab !== this.tabIndex) this.tabIndex = targetTab;
-		});
-		uni.$on('repair-refresh', () => {
-			this.loadData(true);
+			this.loadRepairedIds().then(() => {
+				this.buildWhere(this.tabIndex);
+				this.loadData(true);
+			});
 		});
 	},
 	onUnload() {
 		uni.$off('repair-refresh');
 	},
 	methods: {
-		async loadMyRequestIds() {
+		async loadRepairedIds() {
 			try {
-				const uid = this.uid;
-				if (!uid) { this.myRequestIds = []; return; }
-				const res = await db.collection('medical-device-repair-request')
-					.where({ deleted: 0, creator: uid })
-					.field('_id').get();
-				this.myRequestIds = (res.result.data || []).map(i => i._id);
+				const res = await db.collection('medical-device-repair')
+					.where({ deleted: 0 })
+					.field('repair_request_id').limit(10000).get();
+				this.repairedIds = [...new Set((res.result.data || []).map(i => i.repair_request_id).filter(Boolean))];
 			} catch (e) {
 				console.error(e);
-				this.myRequestIds = [];
+				this.repairedIds = [];
 			}
 		},
 		buildWhere(tab) {
-			const uid = this.uid;
 			if (tab === 0) {
 				const w = { deleted: 0 };
-				if (uid) w.creator = uid;
+				if (this.repairedIds.length) {
+					w._id = dbCmd.nin(this.repairedIds);
+				}
 				if (this.deviceId) w.device_id = this.deviceId;
 				this.orderby = 'request_date desc';
 				this.where = w;
 			} else {
-				const ids = this.myRequestIds;
 				this.orderby = 'repair_date desc';
-				if (ids.length) {
-					const w = { deleted: 0, repair_request_id: dbCmd.in(ids) };
-					if (this.deviceId) w.device_id = this.deviceId;
-					this.where = w;
-				} else {
-					this.where = { deleted: 0, _id: '__nonexistent__' };
-				}
+				const w = { deleted: 0 };
+				if (this.deviceId) w.device_id = this.deviceId;
+				this.where = w;
 			}
 		},
 		switchTab(e) {
@@ -191,45 +165,6 @@ export default {
 				uni.navigateTo({ url: '/pages/repair-request/repair-add?mode=edit&id=' + item._id });
 			}
 		},
-		async deleteRepairRequest(item) {
-			try {
-				const checkRes = await db.collection('medical-device-repair').where({
-					repair_request_id: item._id,
-					deleted: 0
-				}).field('_id').get();
-				if (checkRes.result.data.length) {
-					uni.showModal({
-						title: '无法删除',
-						content: '该报修单存在关联维修记录，请先删除维修记录。',
-						showCancel: false
-					});
-					return;
-				}
-			} catch (e) { return; }
-			uni.showModal({
-				title: '确认删除',
-				content: '确定删除该报修单吗？',
-				success: async (res) => {
-					if (!res.confirm) return;
-					try {
-						await db.collection('medical-device-repair-request').doc(item._id).update({
-							deleted: 1,
-							updated_at: Date.now()
-						});
-						if (item.device_id) {
-							await db.collection('medical-device').doc(item.device_id).update({
-								status: 2,
-								updated_at: Date.now()
-							});
-						}
-						uni.showToast({ title: '删除成功', icon: 'success' });
-						this.loadData(true);
-					} catch (e) {
-						uni.showToast({ title: e.message || '操作失败', icon: 'none' });
-					}
-				}
-			});
-		},
 		deleteRepair(item) {
 			uni.showModal({
 				title: '确认删除',
@@ -262,7 +197,6 @@ export default {
 			});
 		},
 		async onqueryload(data) {
-			console.log('onqueryload called, data length:', data ? data.length : 0, 'tabIndex:', this.tabIndex);
 			const deviceIds = [...new Set(data.map(i => i.device_id).filter(Boolean))];
 			const deviceMap = {};
 			if (deviceIds.length) {
@@ -309,5 +243,4 @@ export default {
 .action-go-repair { color: #f59e0b; }
 .action-edit { color: #6366f1; }
 .action-delete { color: #ef4444; }
-.loading-hint { text-align: center; padding: 60rpx 0; color: #999; font-size: 26rpx; }
 </style>

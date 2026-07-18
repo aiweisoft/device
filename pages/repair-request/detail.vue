@@ -28,7 +28,7 @@
 		</view>
 
 		<view class="bottom-actions">
-			<button class="btn-primary" @click="toEdit">编辑</button>
+			<button v-if="!isMaintainer" class="btn-primary" @click="toEdit">编辑</button>
 			<button v-if="canRecordRepair" class="btn-success" @click="toRecordRepair">记录维修</button>
 			<button v-if="detail.repair_id" class="btn-outline" @click="toViewRepair">查看维修</button>
 			<button v-if="!detail.repair_id" class="btn-danger" @click="confirmDelete">删除</button>
@@ -38,6 +38,7 @@
 
 <script>
 const db = uniCloud.database();
+import { store } from '@/uni_modules/uni-id-pages/common/store.js';
 
 const statusMap = {
 	1: { text: '待处理', type: 'warning' },
@@ -63,6 +64,9 @@ export default {
 	computed: {
 		canRecordRepair() {
 			return this.detail.status === 1 || this.detail.status === 2;
+		},
+		isMaintainer() {
+			return store.hasLogin && store.userInfo.role?.includes('app_maintainer');
 		}
 	},
 	onLoad(e) {
